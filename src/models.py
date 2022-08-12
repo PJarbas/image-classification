@@ -1,12 +1,10 @@
 from tensorflow.keras.applications.resnet50 import ResNet50
 from tensorflow.keras.applications.vgg19 import VGG19
 from tensorflow.keras.applications.inception_v3 import InceptionV3
-from tensorflow.keras.applications.EfficientNetB3 import EfficientNetB3
 
 from tensorflow.keras.applications.resnet50 import preprocess_input as preprocess_input_resnet50
 from tensorflow.keras.applications.vgg19 import preprocess_input as preprocess_input_vgg19
 from tensorflow.keras.applications.inception_v3 import preprocess_input as preprocess_input_inceptionv3
-from tensorflow.keras.applications.EfficientNetB3 import preprocess_input as preprocess_input_efficientnet
 
 
 class ImageModels:
@@ -24,9 +22,6 @@ class ImageModels:
 
             # Rethinking the Inception Architecture for Computer Vision (2015)
             "inception_v3": InceptionV3,
-
-            # EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks (2019)
-            "efficientnet": EfficientNetB3
         }
         return models[model_name]
     
@@ -36,13 +31,12 @@ class ImageModels:
             "vgg19": preprocess_input_vgg19,
             "resnet50": preprocess_input_resnet50,
             "inception_v3": preprocess_input_inceptionv3,
-            "efficientnet": preprocess_input_efficientnet
         }
         return preprocess[model_name]
     
     def preprocess_image_input(self, input_images,  model_name):
         input_images = input_images.astype('float32')
-        output_ims = self._preprocess_input[model_name](input_images)
+        output_ims = self._preprocess_input(model_name)(input_images)
         return output_ims
 
     def feature_extractor(self, inputs, model_name, input_shape):
