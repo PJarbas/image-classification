@@ -1,3 +1,4 @@
+import tensorflow as tf
 from tensorflow.keras.applications.resnet50 import ResNet50
 from tensorflow.keras.applications.vgg19 import VGG19
 from tensorflow.keras.applications.inception_v3 import InceptionV3
@@ -87,9 +88,7 @@ class ImageModels:
 
         return model
 
-    def create_model(self, model_name="resnet50", optimizer='SGD',
-                     loss='sparse_categorical_crossentropy',
-                     metrics=['accuracy']):
+    def create_model(self, model_name, optimizer, loss, metrics):
 
         inputs = tf.keras.layers.Input(shape=(32, 32, 3))
 
