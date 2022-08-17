@@ -2,12 +2,16 @@ from models import ImageModels
 from data_manager import DataManager
 from matplotlib import pyplot as plt
 import numpy as np
+import tensorflow as tf
+from tensorflow.keras.utils import plot_model
+import os
 
 
 class ModelTrain:
     def __init__(self, model_name, epochs, batch_size, optimizer,
                      loss, metrics):
         
+        self.create_models_dir()
         self.model_name = model_name
         self.epochs = epochs
         self.optimizer = optimizer
@@ -23,6 +27,10 @@ class ModelTrain:
         
         return training_images, training_labels, validation_images, validation_labels
     
+    def create_models_dir(self):
+        if not os.path.exists("../models"):
+            os.makedirs("../models")
+    
     def preprocess(self, training_images, validation_images):
         
         train_x = self.image_models.preprocess_image_input(training_images, model_name=self.model_name)
@@ -30,27 +38,31 @@ class ModelTrain:
         
         return train_x, valid_x
     
-    def plot_metrics(history):
+    def plot_metrics(self, history):
         
         # summarize history for accuracy
-        plt.plot(history.history['accuracy'])
-        plt.plot(history.history['val_accuracy'])
+        plt.figure()
+        plt.plot(history.history['accuracy'], linestyle='dashed', marker='o', markersize=10)
+        plt.plot(history.history['val_accuracy'], linestyle='dashed', marker='o', markersize=10)
         plt.title('model accuracy')
         plt.grid()
         plt.ylabel('Accuracy')
         plt.xlabel('Epochs')
         plt.legend(['train', 'test'], loc='upper left')
-        plt.savefig("accuracy.png", bbox_inches='tight')
+        plt.savefig(f"../models/{self.model_name}-accuracy.png", bbox_inches='tight')
+        plt.close()
         
         # summarize history for loss
-        plt.plot(history.history['loss'])
-        plt.plot(history.history['val_loss'])
+        plt.figure()
+        plt.plot(history.history['loss'], linestyle='dashed', marker='o', markersize=10)
+        plt.plot(history.history['val_loss'], linestyle='dashed', marker='o', markersize=10)
         plt.title('model loss')
         plt.grid()
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
         plt.legend(['train', 'test'], loc='upper left')
-        plt.savefig("loss.png", bbox_inches='tight')
+        plt.savefig(f"../models/{self.model_name}-loss.png", bbox_inches='tight')
+        plt.close()
         
         
     
@@ -64,20 +76,21 @@ class ModelTrain:
                      loss=self.loss, metrics=self.metrics)
         
         print(model.summary())
+         
+        filepath = f"../models/{self.model_name}.val_accuracy" + "-{val_accuracy:.4f}.hdf5"
         
         callbacks = [
-            tf.keras.callbacks.EarlyStopping(patience=3, monitor="loss"),
-            tf.keras.callbacks.ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.2f}.h5'),
+            tf.keras.callbacks.EarlyStopping(patience=3, monitor='val_accuracy'),
+            tf.keras.callbacks.ModelCheckpoint(filepath=filepath,
+                                               monitor='val_accuracy',
+                                               mode="max",
+                                               save_best_only=True),
             tf.keras.callbacks.TensorBoard(log_dir='./logs'),
         ]
         
         history = model.fit(train_x, training_labels, epochs=self.epochs,
                             validation_data = (valid_x, validation_labels),
                             batch_size=self.batch_size, callbacks=callbacks)
-        
-        model.save(f"../models/{self.model_name}.h5")
-        
-        loss, accuracy = model.evaluate(valid_x, validation_labels, batch_size=self.batch_size)
         
         self.plot_metrics(history)
         
@@ -89,7 +102,7 @@ class ModelTrain:
 
 if __name__ == "__main__":
     
-    model_train = ModelTrain(model_name="mobilenet_v2", epochs=4,
+    model_train = ModelTrain(model_name="mobilenet_v2", epochs=2,
                              batch_size=64, optimizer='SGD',
                              loss='sparse_categorical_crossentropy',
                              metrics=['accuracy'])

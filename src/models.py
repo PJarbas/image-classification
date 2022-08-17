@@ -60,10 +60,13 @@ class ImageModels:
             feature_extractor
         """
 
-        feature_extractor = self.select_model(model_name)(input_shape=input_shape,
+        pretrained_model = self.select_model(model_name)(input_shape=input_shape,
                                                           include_top=False,
-                                                          weights='imagenet')(inputs)
-        return feature_extractor
+                                                          weights='imagenet')
+        pretrained_model.trainable = False
+        pretrained_model = pretrained_model(inputs)
+        
+        return pretrained_model
 
     def classifier_layer(self, inputs):
         """_summary_
