@@ -2,10 +2,12 @@ import tensorflow as tf
 from tensorflow.keras.applications.resnet50 import ResNet50
 from tensorflow.keras.applications.vgg19 import VGG19
 from tensorflow.keras.applications.inception_v3 import InceptionV3
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
 
 from tensorflow.keras.applications.resnet50 import preprocess_input as preprocess_input_resnet50
 from tensorflow.keras.applications.vgg19 import preprocess_input as preprocess_input_vgg19
 from tensorflow.keras.applications.inception_v3 import preprocess_input as preprocess_input_inceptionv3
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input as preprocess_input_mobilenetv2
 
 
 class ImageModels:
@@ -23,6 +25,9 @@ class ImageModels:
 
             # Rethinking the Inception Architecture for Computer Vision (2015)
             "inception_v3": InceptionV3,
+            
+            # MobileNetV2: Inverted Residuals and Linear Bottlenecks (2018)
+            "mobilenet_v2": MobileNetV2
         }
         return models[model_name]
     
@@ -32,6 +37,7 @@ class ImageModels:
             "vgg19": preprocess_input_vgg19,
             "resnet50": preprocess_input_resnet50,
             "inception_v3": preprocess_input_inceptionv3,
+            "mobilenet_v2": preprocess_input_mobilenetv2,
         }
         return preprocess[model_name]
     

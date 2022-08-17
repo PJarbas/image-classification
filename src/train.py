@@ -5,9 +5,8 @@ import numpy as np
 
 
 class ModelTrain:
-    def __init__(self, model_name="resnet50", epochs=4, batch_size=64, optimizer='SGD',
-                     loss='sparse_categorical_crossentropy',
-                     metrics=['accuracy']):
+    def __init__(self, model_name, epochs, batch_size, optimizer,
+                     loss, metrics):
         
         self.model_name = model_name
         self.epochs = epochs
@@ -31,11 +30,29 @@ class ModelTrain:
         
         return train_x, valid_x
     
-    def plot_metrics(history, metric_name, title, ylim=5):
-        plt.title(title)
-        plt.ylim(0,ylim)
-        plt.plot(history.history[metric_name],color='blue',label=metric_name)
-        plt.plot(history.history['val_' + metric_name],color='green',label='val_' + metric_name)
+    def plot_metrics(history):
+        
+        # summarize history for accuracy
+        plt.plot(history.history['accuracy'])
+        plt.plot(history.history['val_accuracy'])
+        plt.title('model accuracy')
+        plt.grid()
+        plt.ylabel('Accuracy')
+        plt.xlabel('Epochs')
+        plt.legend(['train', 'test'], loc='upper left')
+        plt.savefig("accuracy.png", bbox_inches='tight')
+        
+        # summarize history for loss
+        plt.plot(history.history['loss'])
+        plt.plot(history.history['val_loss'])
+        plt.title('model loss')
+        plt.grid()
+        plt.ylabel('Loss')
+        plt.xlabel('Epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+        plt.savefig("loss.png", bbox_inches='tight')
+        
+        
     
     def run(self):
         
@@ -48,19 +65,21 @@ class ModelTrain:
         
         print(model.summary())
         
+        callbacks = [
+            tf.keras.callbacks.EarlyStopping(patience=3, monitor="loss"),
+            tf.keras.callbacks.ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.2f}.h5'),
+            tf.keras.callbacks.TensorBoard(log_dir='./logs'),
+        ]
+        
         history = model.fit(train_x, training_labels, epochs=self.epochs,
                             validation_data = (valid_x, validation_labels),
-                            batch_size=self.batch_size)
+                            batch_size=self.batch_size, callbacks=callbacks)
+        
+        model.save(f"../models/{self.model_name}.h5")
         
         loss, accuracy = model.evaluate(valid_x, validation_labels, batch_size=self.batch_size)
         
-        # self.plot_metrics(history, "loss", "Loss")
-        # self.plot_metrics(history, "accuracy", "Accuracy")
-        
-        
-        #TODO
-        # plot results in a better way
-        # save models to file
+        self.plot_metrics(history)
         
         # probabilities = model.predict(valid_X, batch_size=64)
         # probabilities = np.argmax(probabilities, axis = 1)
@@ -70,7 +89,10 @@ class ModelTrain:
 
 if __name__ == "__main__":
     
-    model_train = ModelTrain()
+    model_train = ModelTrain(model_name="mobilenet_v2", epochs=4,
+                             batch_size=64, optimizer='SGD',
+                             loss='sparse_categorical_crossentropy',
+                             metrics=['accuracy'])
     model_train.run()
     
     
