@@ -12,11 +12,8 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input as prepr
 
 class ImageModels:
     def __init__(self):
-        pass
-
-    def select_model(self, model_name):
-        # more models in https://keras.io/api/applications/
-        models = {
+        
+        self._models_dict = {
             # Very Deep Convolutional Networks for Large-Scale Image Recognition (2014)
             "vgg19": VGG19,
 
@@ -29,7 +26,13 @@ class ImageModels:
             # MobileNetV2: Inverted Residuals and Linear Bottlenecks (2018)
             "mobilenet_v2": MobileNetV2
         }
-        return models[model_name]
+    
+    def list_models(self):
+        return list(self._models_dict.keys())
+
+    def select_model(self, model_name):
+        # more models in https://keras.io/api/applications/
+        return self._models_dict[model_name]
     
     def _preprocess_input(self, model_name):
       
