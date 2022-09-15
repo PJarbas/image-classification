@@ -60,7 +60,7 @@ class ModelTrain:
                  linestyle='dashed', marker='o', markersize=10)
         plt.plot(history.history['val_accuracy'],
                  linestyle='dashed', marker='o', markersize=10)
-        plt.title('model accuracy')
+        plt.title(f"{self.model_name} model accuracy")
         plt.grid()
         plt.ylabel('Accuracy')
         plt.xlabel('Epochs')
@@ -75,7 +75,7 @@ class ModelTrain:
                  linestyle='dashed', marker='o', markersize=10)
         plt.plot(history.history['val_loss'],
                  linestyle='dashed', marker='o', markersize=10)
-        plt.title('model loss')
+        plt.title(f"{self.model_name} model loss")
         plt.grid()
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
@@ -101,8 +101,10 @@ class ModelTrain:
             "-{val_accuracy:.4f}.hdf5"
 
         callbacks = [
+            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', factor=0.2,
+                              patience=3, min_lr=0.001, cooldown=1),
             tf.keras.callbacks.EarlyStopping(
-                patience=3, monitor='val_accuracy'),
+                patience=4, monitor='val_accuracy'),
             tf.keras.callbacks.ModelCheckpoint(filepath=filepath,
                                                monitor='val_accuracy',
                                                mode="max",
@@ -121,8 +123,8 @@ if __name__ == "__main__":
     
     # models: vgg19, resnet50, inception_v3, mobilenet_v2
     
-    model_train = ModelTrain(model_name="vgg19", epochs=30,
-                             batch_size=64, optimizer='SGD',
+    model_train = ModelTrain(model_name="mobilenet_v2", epochs=30,
+                             batch_size=64, optimizer='adam',
                              loss='sparse_categorical_crossentropy',
                              metrics=['accuracy'])
     model_train.run()

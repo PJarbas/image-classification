@@ -14,6 +14,9 @@ class ImageModels:
     def __init__(self):
         
         self._models_dict = {
+            # baseline
+            "baseline": self.baseline_model,
+        
             # Very Deep Convolutional Networks for Large-Scale Image Recognition (2014)
             "vgg19": VGG19,
 
@@ -26,6 +29,38 @@ class ImageModels:
             # MobileNetV2: Inverted Residuals and Linear Bottlenecks (2018)
             "mobilenet_v2": MobileNetV2
         }
+        
+    def baseline_model(self, inputs):
+        
+        x = tf.keras.layers.Conv2D(32, (3,3), padding='same', activation='relu', input_shape=(32,32,3))(inputs)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Conv2D(32, (3,3), padding='same', activation='relu')(x)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.MaxPooling2D(pool_size=(2,2))(x)
+        x = tf.keras.layers.Dropout(0.3)(x)
+        
+        x = tf.keras.layers.Conv2D(64, (3,3), padding='same', activation='relu')(x)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Conv2D(64, (3,3), padding='same', activation='relu')(x)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.MaxPooling2D(pool_size=(2,2))(x)
+        x = tf.keras.layers.Dropout(0.5)(x)
+        
+        x = tf.keras.layers.Conv2D(128, (3,3), padding='same', activation='relu')(x)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Conv2D(128, (3,3), padding='same', activation='relu')(x)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.MaxPooling2D(pool_size=(2,2))(x)
+        x = tf.keras.layers.Dropout(0.5)(x)
+        
+        x = tf.keras.layers.Flatten()(x)
+        x = tf.keras.layers.Dense(128, activation="relu")(x)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Dropout(0.5)(x)
+        x = tf.keras.layers.Dense(
+            10, activation="softmax", name="classification")(x)
+    
+        return x
     
     def list_models(self):
         return list(self._models_dict.keys())
@@ -76,6 +111,7 @@ class ImageModels:
         x = tf.keras.layers.Flatten()(x)
         x = tf.keras.layers.Dense(1024, activation="relu")(x)
         x = tf.keras.layers.Dense(512, activation="relu")(x)
+        x = tf.keras.layers.Dropout(0.3)(x)
         x = tf.keras.layers.Dense(
             10, activation="softmax", name="classification")(x)
         return x
@@ -103,8 +139,11 @@ class ImageModels:
     def create_model(self, model_name, optimizer, loss, metrics):
 
         inputs = tf.keras.layers.Input(shape=(32, 32, 3))
-
-        model = self.model_architecture(inputs, model_name, input_shape=(224, 224, 3))
+        
+        if model_name == "baseline":
+            model = self._models_dict["baseline"](inputs)
+        else:
+            model = self.model_architecture(inputs, model_name, input_shape=(224, 224, 3))
 
         model.compile(optimizer=optimizer,
                       loss=loss,
