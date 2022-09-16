@@ -29,7 +29,10 @@ class ImageModels:
             # MobileNetV2: Inverted Residuals and Linear Bottlenecks (2018)
             "mobilenet_v2": MobileNetV2
         }
-        
+    
+    def preprocess_baseline(self, images):
+        return images / 255  
+           
     def baseline_model(self, inputs):
         
         x = tf.keras.layers.Conv2D(32, (3,3), padding='same', activation='relu', input_shape=(32,32,3))(inputs)
@@ -59,8 +62,10 @@ class ImageModels:
         x = tf.keras.layers.Dropout(0.5)(x)
         x = tf.keras.layers.Dense(
             10, activation="softmax", name="classification")(x)
+        
+        model = tf.keras.Model(inputs=inputs, outputs=x)
     
-        return x
+        return model
     
     def list_models(self):
         return list(self._models_dict.keys())
@@ -72,6 +77,7 @@ class ImageModels:
     def _preprocess_input(self, model_name):
       
         preprocess = {
+            "baseline": self.preprocess_baseline,
             "vgg19": preprocess_input_vgg19,
             "resnet50": preprocess_input_resnet50,
             "inception_v3": preprocess_input_inceptionv3,

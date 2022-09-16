@@ -103,13 +103,17 @@ class ModelTrain:
         callbacks = [
             tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', factor=0.2,
                               patience=3, min_lr=0.001, cooldown=1),
+            
             tf.keras.callbacks.EarlyStopping(
                 patience=4, monitor='val_accuracy'),
+            
             tf.keras.callbacks.ModelCheckpoint(filepath=filepath,
                                                monitor='val_accuracy',
                                                mode="max",
                                                save_best_only=True),
-            tf.keras.callbacks.TensorBoard(log_dir='./logs'),
+            
+            tf.keras.callbacks.TensorBoard(log_dir='../logs',  histogram_freq=0,  
+                                           write_graph=True, write_images=True),
         ]
 
         history = model.fit(train_x, training_labels, epochs=self.epochs,
@@ -121,9 +125,9 @@ class ModelTrain:
 
 if __name__ == "__main__":
     
-    # models: vgg19, resnet50, inception_v3, mobilenet_v2
+    # models: baseline, vgg19, resnet50, inception_v3, mobilenet_v2
     
-    model_train = ModelTrain(model_name="mobilenet_v2", epochs=30,
+    model_train = ModelTrain(model_name="resnet50", epochs=30,
                              batch_size=64, optimizer='adam',
                              loss='sparse_categorical_crossentropy',
                              metrics=['accuracy'])
